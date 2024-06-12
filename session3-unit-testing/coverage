@@ -1,0 +1,15 @@
+mode: set
+session3-unit-testing/main.go:10.13,23.2 5 0
+session3-unit-testing/middleware/auth.go:9.39,10.30 1 1
+session3-unit-testing/middleware/auth.go:10.30,13.18 2 1
+session3-unit-testing/middleware/auth.go:13.18,17.4 3 1
+session3-unit-testing/middleware/auth.go:19.3,19.29 1 1
+session3-unit-testing/middleware/auth.go:19.29,23.4 3 1
+session3-unit-testing/middleware/auth.go:25.3,25.11 1 1
+session3-unit-testing/handler/handler.go:5.31,7.2 1 1
+session3-unit-testing/handler/handler.go:9.34,13.2 1 1
+session3-unit-testing/handler/handler.go:15.34,19.48 2 1
+session3-unit-testing/handler/handler.go:19.48,21.3 1 1
+session3-unit-testing/handler/handler.go:21.8,23.3 1 1
+session3-unit-testing/router/router.go:10.33,18.2 4 1
+session3-unit-testing/router/router.go:18.2,20.3 1 1
