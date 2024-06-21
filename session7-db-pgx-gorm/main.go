@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"session7-db-pgx-gorm/entity"
 	"session7-db-pgx-gorm/handler"
 	"session7-db-pgx-gorm/repository/postgres_gorm_raw"
 	"session7-db-pgx-gorm/repository/postgrespgx"
@@ -34,6 +35,11 @@ func main() {
 
 	}
 
+	log.Println("starting migration")
+	if err := gormDB.AutoMigrate(entity.User{}, entity.Customer{}); err != nil {
+		log.Println(err)
+	}
+	log.Println("finish migration")
 	// setup service
 
 	// slice db is disabled. uncomment to enabled
