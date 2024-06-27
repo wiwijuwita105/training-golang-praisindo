@@ -93,7 +93,29 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	var responseUser []UserWithRiskResponse
+	var riskScore int
+	var riskCategory string
+	var riskDefinition string
+
+	if len(user.Submissions) > 0 {
+		riskScore = user.Submissions[0].RiskScore
+		riskCategory = user.Submissions[0].RiskCategory
+		riskDefinition = getRiskDefinition(config.ProfileRiskCategory(user.Submissions[0].RiskCategory))
+	}
+
+	responseUser = append(responseUser, UserWithRiskResponse{
+		ID:             user.ID,
+		Name:           user.Name,
+		Email:          user.Email,
+		RiskScore:      riskScore,
+		RiskCategory:   riskCategory,
+		RiskDefinition: riskDefinition,
+		CreatedAt:      user.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:      user.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	})
+
+	c.JSON(http.StatusOK, responseUser[0])
 }
 
 // UpdateUser menghandle permintaan untuk mengupdate informasi user
@@ -222,6 +244,8 @@ func (h *UserHandler) GetAllUsersWithRIsk(c *gin.Context) {
 
 		responseUser = append(responseUser, UserWithRiskResponse{
 			ID:             sub.ID,
+			Name:           sub.Name,
+			Email:          sub.Email,
 			RiskScore:      riskScore,
 			RiskCategory:   riskCategory,
 			RiskDefinition: riskDefinition,

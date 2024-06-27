@@ -43,7 +43,9 @@ func (r *userRepository) CreateUser(ctx context.Context, user *entity.User) (ent
 // GetUserByID mengambil pengguna berdasarkan ID
 func (r *userRepository) GetUserByID(ctx context.Context, id int) (entity.User, error) {
 	var user entity.User
-	if err := r.db.WithContext(ctx).Select("id", "name", "email", "created_at", "updated_at").First(&user, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Submissions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at desc").Limit(1)
+	}).First(&user, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entity.User{}, nil
 		}
