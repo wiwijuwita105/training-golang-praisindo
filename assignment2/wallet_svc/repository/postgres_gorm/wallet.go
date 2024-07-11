@@ -42,7 +42,7 @@ func (r *walletRepository) CreateWallet(ctx context.Context, wallet *entity.Wall
 func (r *walletRepository) GetWalletByUserID(ctx context.Context, userid int) (entity.Wallet, error) {
 	var wallet entity.Wallet
 	log.Println(userid)
-	if err := r.db.WithContext(ctx).Where("user_id = ?", userid).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userid).First(&wallet).Error; err != nil {
 		log.Println(err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entity.Wallet{}, nil
@@ -50,6 +50,7 @@ func (r *walletRepository) GetWalletByUserID(ctx context.Context, userid int) (e
 		log.Printf("Error getting wallet by user ID: %v\n", err)
 		return entity.Wallet{}, err
 	}
+	log.Println(wallet)
 	return wallet, nil
 }
 
