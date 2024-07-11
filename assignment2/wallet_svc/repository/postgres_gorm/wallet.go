@@ -41,7 +41,6 @@ func (r *walletRepository) CreateWallet(ctx context.Context, wallet *entity.Wall
 // GetWalletByUserID mengambil wallet berdasarkan User ID
 func (r *walletRepository) GetWalletByUserID(ctx context.Context, userid int) (entity.Wallet, error) {
 	var wallet entity.Wallet
-	log.Println(userid)
 	if err := r.db.WithContext(ctx).Where("user_id = ?", userid).First(&wallet).Error; err != nil {
 		log.Println(err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -65,4 +64,20 @@ func (r *walletRepository) GetAllWallets(ctx context.Context) ([]entity.Wallet, 
 		return nil, err
 	}
 	return wallets, nil
+}
+
+func (r *walletRepository) UpdateWallet(ctx context.Context, id int, wallet entity.Wallet) (entity.Wallet, error) {
+	// Menemukan pengguna yang akan diperbarui
+	var existingWallet entity.Wallet
+	if err := r.db.WithContext(ctx).First(&existingWallet, id).Error; err != nil {
+		log.Printf("Error finding wallet to update: %v\n", err)
+		return entity.Wallet{}, err
+	}
+
+	existingWallet.Balance = wallet.Balance
+	if err := r.db.WithContext(ctx).Save(&existingWallet).Error; err != nil {
+		log.Printf("Error updating wallet: %v\n", err)
+		return entity.Wallet{}, err
+	}
+	return existingWallet, nil
 }

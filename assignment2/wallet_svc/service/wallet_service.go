@@ -11,6 +11,7 @@ type IWalletService interface {
 	CreateWallet(ctx context.Context, user *entity.Wallet) (entity.Wallet, error)
 	GetWalletByUserID(ctx context.Context, id int) (entity.Wallet, error)
 	GetAllWallets(ctx context.Context) ([]entity.Wallet, error)
+	UpdateWallet(ctx context.Context, id int, wallet entity.Wallet) (entity.Wallet, error)
 }
 
 // IWalletRepository mendefinisikan interface untuk repository wallet
@@ -18,6 +19,7 @@ type IWalletRepository interface {
 	CreateWallet(ctx context.Context, user *entity.Wallet) (entity.Wallet, error)
 	GetWalletByUserID(ctx context.Context, id int) (entity.Wallet, error)
 	GetAllWallets(ctx context.Context) ([]entity.Wallet, error)
+	UpdateWallet(ctx context.Context, id int, wallet entity.Wallet) (entity.Wallet, error)
 }
 
 // walletService adalah implementasi dari IWalletService yang menggunakan IWalletRepository
@@ -58,4 +60,12 @@ func (s *walletService) GetAllWallets(ctx context.Context) ([]entity.Wallet, err
 		return nil, fmt.Errorf("gagal mendapatkan semua wallet: %v", err)
 	}
 	return wallets, nil
+}
+
+func (s *walletService) UpdateWallet(ctx context.Context, id int, wallet entity.Wallet) (entity.Wallet, error) {
+	updatedWallet, err := s.walletRepo.UpdateWallet(ctx, id, wallet)
+	if err != nil {
+		return entity.Wallet{}, fmt.Errorf("gagal memperbarui wallet: %v", err)
+	}
+	return updatedWallet, nil
 }
