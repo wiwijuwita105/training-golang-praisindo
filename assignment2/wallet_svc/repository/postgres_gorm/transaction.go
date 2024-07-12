@@ -2,6 +2,8 @@ package postgres_gorm
 
 import (
 	"context"
+	"errors"
+	"gorm.io/gorm"
 	"log"
 	"wallet_svc/entity"
 	"wallet_svc/service"
@@ -21,4 +23,17 @@ func (r *transactionRepository) CreateTransaction(ctx context.Context, transacti
 		return entity.Transaction{}, err
 	}
 	return *transaction, nil
+}
+
+func (r *transactionRepository) GetAllTransactions(ctx context.Context, param entity.TransactionGetRequest) ([]entity.Transaction, error) {
+	log.Println(param.Type)
+	var transactions []entity.Transaction
+	if err := r.db.WithContext(ctx).Where("type = ?", param.Type).Find(&transactions).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return transactions, nil
+		}
+		log.Printf("Error getting all wallets: %v\n", err)
+		return nil, err
+	}
+	return transactions, nil
 }

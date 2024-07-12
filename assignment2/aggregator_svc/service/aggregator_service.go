@@ -2,6 +2,7 @@ package service
 
 import (
 	"aggregator_svc/entity"
+	transaction_service "aggregator_svc/proto/transaction_service/v1"
 	user_service "aggregator_svc/proto/user_service/v1"
 	wallet_service "aggregator_svc/proto/wallet_service/v1"
 	"context"
@@ -12,18 +13,52 @@ import (
 
 type IAggregatorService interface {
 	GetUser(ctx context.Context, id int) (entity.UserResponse, error)
+	TopupTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error)
+	TransferTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error)
 }
 
 type AggregatorService struct {
-	userService   user_service.UserServiceClient
-	walletService wallet_service.WalletServiceClient
+	userService        user_service.UserServiceClient
+	walletService      wallet_service.WalletServiceClient
+	transactionService transaction_service.TransactionServiceClient
 }
 
-func NewAggregatorService(userService user_service.UserServiceClient, walletService wallet_service.WalletServiceClient) *AggregatorService {
+func NewAggregatorService(userService user_service.UserServiceClient, walletService wallet_service.WalletServiceClient, transactionService transaction_service.TransactionServiceClient) *AggregatorService {
 	return &AggregatorService{
-		userService:   userService,
-		walletService: walletService,
+		userService:        userService,
+		walletService:      walletService,
+		transactionService: transactionService,
 	}
+}
+
+func (svc *AggregatorService) TopupTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error) {
+	transactionResp, err := svc.transactionService.CreateTransaction(ctx, &transaction_service.CreateTransactionRequest{
+		ToID:   int32(request.ToID),
+		Type:   "topup",
+		Amount: float32(request.Amount),
+	})
+	if err != nil {
+		return entity.TransactionResponse{}, err
+	}
+	log.Println(transactionResp)
+	return entity.TransactionResponse{Message: transactionResp.Message}, nil
+}
+
+func (svc *AggregatorService) TransferTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error) {
+	log.Println(request)
+	transactionResp, err := svc.transactionService.CreateTransaction(ctx, &transaction_service.CreateTransactionRequest{
+		FromID: request.FromID,
+		ToID:   int32(request.ToID),
+		Type:   "transfer",
+		Amount: float32(request.Amount),
+	})
+	log.Println(transactionResp)
+	log.Println(err)
+	if err != nil {
+		return entity.TransactionResponse{}, err
+	}
+	log.Println(transactionResp)
+	return entity.TransactionResponse{Message: transactionResp.Message}, nil
 }
 
 func (svc *AggregatorService) GetUser(ctx context.Context, id int) (entity.UserResponse, error) {

@@ -9,10 +9,12 @@ import (
 
 type ITransactionService interface {
 	CreateTransaction(ctx context.Context, transaction *entity.TransactionRequest) (entity.Transaction, error)
+	GetAllTransactions(ctx context.Context, transaction entity.TransactionGetRequest) ([]entity.Transaction, error)
 }
 
 type ITransactionRepository interface {
 	CreateTransaction(ctx context.Context, transaction *entity.Transaction) (entity.Transaction, error)
+	GetAllTransactions(ctx context.Context, transaction entity.TransactionGetRequest) ([]entity.Transaction, error)
 }
 
 type transactionService struct {
@@ -28,6 +30,7 @@ func NewTransactionService(transactionRepo ITransactionRepository, walletRepo IW
 }
 
 func (s *transactionService) CreateTransaction(ctx context.Context, transaction *entity.TransactionRequest) (entity.Transaction, error) {
+	log.Println(transaction)
 	if transaction.Type == "topup" {
 		//create transaction
 		userId := transaction.ToID
@@ -56,6 +59,7 @@ func (s *transactionService) CreateTransaction(ctx context.Context, transaction 
 		if err != nil {
 			return dataTransaction, fmt.Errorf("gagal memperbarui wallet: %v", err)
 		}
+		return dataTransaction, nil
 	} else {
 		//untuk mengurangi balance wallet
 		dataTransaction := entity.Transaction{
@@ -94,7 +98,7 @@ func (s *transactionService) CreateTransaction(ctx context.Context, transaction 
 		createdTrans, err := s.transactionRepo.CreateTransaction(ctx, &dtTransaction)
 		log.Println(createdTrans)
 		if err != nil {
-			return dataTransaction, fmt.Errorf("gagal create transaction: %v", err)
+			return dtTransaction, fmt.Errorf("gagal create transaction: %v", err)
 		}
 
 		getWalletTo, err := s.walletRepo.GetWalletByUserID(ctx, transaction.ToID)
@@ -109,8 +113,17 @@ func (s *transactionService) CreateTransaction(ctx context.Context, transaction 
 		updatedWalletTo, err := s.walletRepo.UpdateWallet(ctx, getWalletTo.ID, dtWallet)
 		log.Println(updatedWalletTo)
 		if err != nil {
-			return dataTransaction, fmt.Errorf("gagal mengurangi balance wallet: %v", err)
+			return dtTransaction, fmt.Errorf("gagal mengurangi balance wallet: %v", err)
 		}
+		return dtTransaction, nil
 	}
-	return entity.Transaction{}, nil
+
+}
+
+func (s *transactionService) GetAllTransactions(ctx context.Context, param entity.TransactionGetRequest) ([]entity.Transaction, error) {
+	transactions, err := s.transactionRepo.GetAllTransactions(ctx, param)
+	if err != nil {
+		return nil, fmt.Errorf("gagal mendapatkan semua wallet: %v", err)
+	}
+	return transactions, nil
 }

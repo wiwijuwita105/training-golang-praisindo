@@ -7,10 +7,12 @@ import (
 )
 
 func SetupRouter(r *gin.Engine, aggregator handler.IAggregatorHandler) {
-	//r.GET("/health-check", healthcheck.HealthCheck)
-
 	userEndpoint := r.Group("/user")
 	userEndpoint.Use(middleware.AuthMiddleware())
 	userEndpoint.GET("/:userId", aggregator.GetUser)
 
+	transactionEndpoint := r.Group("/transaction")
+	transactionEndpoint.Use(middleware.AuthMiddleware())
+	transactionEndpoint.POST("/topup", aggregator.TopupTransaction)
+	transactionEndpoint.POST("/transfer", aggregator.TransferTransaction)
 }

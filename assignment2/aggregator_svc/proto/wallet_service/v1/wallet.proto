@@ -3,47 +3,48 @@ option go_package = "wallet_svc/proto/wallet_service/v1;wallet";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 package proto.wallet_service.v1;
 
 service walletService {
-    rpc GetWallets (google.protobuf.Empty) returns (GetWalletsResponse) {}
-    rpc GetWalletByUserID (GetWalletByUserIDRequest) returns (GetWalletByUserIDResponse) {}
-    rpc CreateWallet (CreateWalletRequest) returns (MutationResponse) {}
-    rpc UpdateWallet (UpdateWalletRequest) returns (MutationResponse) {}
-  }
-  
-  message Wallet {
-    int32 id = 1;
-    int32 userID = 2;
-    float balance = 3;
-    google.protobuf.Timestamp created_at = 5;
-    google.protobuf.Timestamp updated_at = 6;
-  }
-  
-  message GetWalletsResponse {
-    repeated Wallet wallets = 1;
-  }
-  
-  message GetWalletByUserIDRequest {
-    int32 userID = 1;
-  }
-  
-  message GetWalletByUserIDResponse {
-    Wallet wallet = 1;
-  }
+  rpc GetWallets (google.protobuf.Empty) returns (GetWalletsResponse) {}
+  rpc GetWalletByUserID (GetWalletByUserIDRequest) returns (GetWalletByUserIDResponse) {}
+  rpc CreateWallet (CreateWalletRequest) returns (MutationResponse) {}
+  rpc UpdateWallet (UpdateWalletRequest) returns (MutationResponse) {}
+}
 
-  message CreateWalletRequest {
-    int32 id = 1;
-    int32 userID = 2;
-    float balance = 3;
-  }
+message Wallet {
+  int32 id = 1;
+  int32 userID = 2;
+  float balance = 3;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
 
-  message UpdateWalletRequest {
-    int32 id = 1;
-    float balance = 2;
-  }
-  
-  message MutationResponse {
-    string message = 1;
-  }
+message GetWalletsResponse {
+  repeated Wallet wallets = 1;
+}
+
+message GetWalletByUserIDRequest {
+  int32 userID = 1;
+}
+
+message GetWalletByUserIDResponse {
+  Wallet wallet = 1;
+}
+
+message CreateWalletRequest {
+  int32 id = 1;
+  int32 userID = 2;
+  float balance = 3;
+}
+
+message UpdateWalletRequest {
+  int32 id = 1;
+  float balance = 2;
+}
+
+message MutationResponse {
+  string message = 1;
+}

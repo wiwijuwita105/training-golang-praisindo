@@ -19,7 +19,6 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	TransactionService_GetTransactions_FullMethodName   = "/proto.transaction_service.v1.transactionService/GetTransactions"
 	TransactionService_CreateTransaction_FullMethodName = "/proto.transaction_service.v1.transactionService/CreateTransaction"
 )
 
@@ -27,7 +26,6 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TransactionServiceClient interface {
-	GetTransactions(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error)
 	CreateTransaction(ctx context.Context, in *CreateTransactionRequest, opts ...grpc.CallOption) (*MutationTransResponse, error)
 }
 
@@ -37,16 +35,6 @@ type transactionServiceClient struct {
 
 func NewTransactionServiceClient(cc grpc.ClientConnInterface) TransactionServiceClient {
 	return &transactionServiceClient{cc}
-}
-
-func (c *transactionServiceClient) GetTransactions(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetTransactionResponse)
-	err := c.cc.Invoke(ctx, TransactionService_GetTransactions_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *transactionServiceClient) CreateTransaction(ctx context.Context, in *CreateTransactionRequest, opts ...grpc.CallOption) (*MutationTransResponse, error) {
@@ -63,7 +51,6 @@ func (c *transactionServiceClient) CreateTransaction(ctx context.Context, in *Cr
 // All implementations must embed UnimplementedTransactionServiceServer
 // for forward compatibility
 type TransactionServiceServer interface {
-	GetTransactions(context.Context, *GetTransactionRequest) (*GetTransactionResponse, error)
 	CreateTransaction(context.Context, *CreateTransactionRequest) (*MutationTransResponse, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
@@ -72,9 +59,6 @@ type TransactionServiceServer interface {
 type UnimplementedTransactionServiceServer struct {
 }
 
-func (UnimplementedTransactionServiceServer) GetTransactions(context.Context, *GetTransactionRequest) (*GetTransactionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTransactions not implemented")
-}
 func (UnimplementedTransactionServiceServer) CreateTransaction(context.Context, *CreateTransactionRequest) (*MutationTransResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTransaction not implemented")
 }
@@ -89,24 +73,6 @@ type UnsafeTransactionServiceServer interface {
 
 func RegisterTransactionServiceServer(s grpc.ServiceRegistrar, srv TransactionServiceServer) {
 	s.RegisterService(&TransactionService_ServiceDesc, srv)
-}
-
-func _TransactionService_GetTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTransactionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransactionServiceServer).GetTransactions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransactionService_GetTransactions_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).GetTransactions(ctx, req.(*GetTransactionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _TransactionService_CreateTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -134,10 +100,6 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.transaction_service.v1.transactionService",
 	HandlerType: (*TransactionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetTransactions",
-			Handler:    _TransactionService_GetTransactions_Handler,
-		},
 		{
 			MethodName: "CreateTransaction",
 			Handler:    _TransactionService_CreateTransaction_Handler,

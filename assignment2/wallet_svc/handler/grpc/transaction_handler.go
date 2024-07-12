@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"wallet_svc/entity"
 	pb "wallet_svc/proto/transaction_service/v1"
@@ -21,6 +22,7 @@ func NewTransactionHandler(transactionService service.ITransactionService) *Tran
 }
 
 func (u *TransactionHandler) CreateTransaction(ctx context.Context, req *pb.CreateTransactionRequest) (*pb.MutationTransResponse, error) {
+	log.Println(req)
 	createdTransaction, err := u.transactionService.CreateTransaction(ctx, &entity.TransactionRequest{
 		FromID: int(req.GetFromID()),
 		ToID:   int(req.GetToID()),
@@ -33,5 +35,32 @@ func (u *TransactionHandler) CreateTransaction(ctx context.Context, req *pb.Crea
 	}
 	return &pb.MutationTransResponse{
 		Message: fmt.Sprintf("Success created Transaction with ID %d", createdTransaction.ID),
+	}, nil
+}
+
+func (u *TransactionHandler) GetTransactions(ctx context.Context, req *pb.GetTransactionRequest) (*pb.GetTransactionResponse, error) {
+	transactions, err := u.transactionService.GetAllTransactions(ctx, entity.TransactionGetRequest{
+		Type: req.GetType(),
+	})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	var transactionProto []*pb.Transaction
+	for _, transaction := range transactions {
+		transactionProto = append(transactionProto, &pb.Transaction{
+			Id:        int32(transaction.ID),
+			UserID:    int32(transaction.UserID),
+			Amount:    float32(transaction.Amount),
+			Type:      string(transaction.Type),
+			Category:  string(transaction.Category),
+			CreatedAt: timestamppb.New(transaction.CreatedAt),
+			UpdatedAt: timestamppb.New(transaction.UpdatedAt),
+		})
+	}
+
+	return &pb.GetTransactionResponse{
+		Transactions: transactionProto,
 	}, nil
 }

@@ -23,10 +23,16 @@ func main() {
 	// Initialize wallet service
 	walletClient := config.InitWalletSvc()
 	if walletClient == nil {
-		log.Fatal("Failed to initialize User Service Client")
+		log.Fatal("Failed to initialize Wallet Service Client")
 	}
 
-	aggregationService := service.NewAggregatorService(userClient, walletClient)
+	// Initialize wallet service
+	transactionClient := config.InitTransactionSvc()
+	if transactionClient == nil {
+		log.Fatal("Failed to initialize Transaction Service Client")
+	}
+
+	aggregationService := service.NewAggregatorService(userClient, walletClient, transactionClient)
 	aggregatorHandler := handler.NewAggregatorHandler(*aggregationService)
 
 	// Definisikan route

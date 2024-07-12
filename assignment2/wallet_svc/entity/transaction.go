@@ -19,3 +19,7 @@ type TransactionRequest struct {
 	Type   string  `json:"type" name:"type"`
 	Amount float64 `json:"amount" name:"amount"`
 }
+
+type TransactionGetRequest struct {
+	Type string `json:"type" name:"type"`
+}
