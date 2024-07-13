@@ -13,6 +13,7 @@ func SetupRouter(r *gin.Engine, aggregator handler.IAggregatorHandler) {
 
 	transactionEndpoint := r.Group("/transaction")
 	transactionEndpoint.Use(middleware.AuthMiddleware())
+	transactionEndpoint.GET("/", aggregator.GetTransactions)
 	transactionEndpoint.POST("/topup", aggregator.TopupTransaction)
 	transactionEndpoint.POST("/transfer", aggregator.TransferTransaction)
 }

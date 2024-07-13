@@ -3,12 +3,12 @@ option go_package = "wallet_svc/proto/transaction_service/v1;transaction";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
 
 package proto.transaction_service.v1;
 
 service transactionService {
-    rpc CreateTransaction (CreateTransactionRequest) returns (MutationTransResponse) {}
+  rpc GetTransactions (GetTransactionRequest) returns (GetTransactionResponse) {}
+  rpc CreateTransaction (CreateTransactionRequest) returns (MutationTransResponse) {}
 }
   
 message Transaction {
@@ -21,7 +21,18 @@ message Transaction {
   google.protobuf.Timestamp created_at = 7;
   google.protobuf.Timestamp updated_at = 8;
 }
-  
+
+message GetTransactionRequest {
+  string type = 1;
+  int32 userID  = 2;
+  int32 page_size = 3;
+  int32 page =4;
+}
+
+message GetTransactionResponse {
+  repeated Transaction transactions = 1;
+  int32 total_count = 2;
+}
 
 message CreateTransactionRequest {
   int32 fromID = 1;

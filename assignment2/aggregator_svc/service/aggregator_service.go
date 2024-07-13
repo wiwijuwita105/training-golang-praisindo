@@ -15,6 +15,7 @@ type IAggregatorService interface {
 	GetUser(ctx context.Context, id int) (entity.UserResponse, error)
 	TopupTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error)
 	TransferTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error)
+	GetTransactions(ctx context.Context, param entity.TransactionGetRequest) (entity.TransactionGetResponseWithPagination, error)
 }
 
 type AggregatorService struct {
@@ -61,6 +62,65 @@ func (svc *AggregatorService) TransferTransaction(ctx context.Context, request e
 	return entity.TransactionResponse{Message: transactionResp.Message}, nil
 }
 
+func (svc *AggregatorService) GetTransactions(ctx context.Context, request entity.TransactionGetRequest) (entity.TransactionGetResponseWithPagination, error) {
+	transactionResp, err := svc.transactionService.GetTransactions(ctx, &transaction_service.GetTransactionRequest{
+		Type:     request.Type,
+		UserID:   int32(request.UserID),
+		PageSize: int32(request.Size),
+		Page:     int32(request.Page),
+	})
+
+	if err != nil {
+		return entity.TransactionGetResponseWithPagination{}, err
+	}
+	var transactionsWithUser []entity.TransactionGetResponse
+	for _, tx := range transactionResp.Transactions {
+		name := ""
+		userResp, err := svc.userService.GetUserByID(ctx, &user_service.GetUserByIDRequest{Id: tx.UserID})
+		if err != nil {
+			return entity.TransactionGetResponseWithPagination{}, err
+		}
+		name = userResp.User.Name
+
+		var createdAt, updatedAt time.Time
+		if tx.CreatedAt != nil {
+			createdAt = tx.CreatedAt.AsTime()
+		}
+		if tx.UpdatedAt != nil {
+			updatedAt = tx.UpdatedAt.AsTime()
+		}
+
+		transactionsWithUser = append(transactionsWithUser, entity.TransactionGetResponse{
+			ID:        int(tx.Id),
+			UserID:    int(tx.UserID),
+			Name:      name,
+			Amount:    float64(tx.Amount),
+			Type:      tx.Type,
+			Category:  tx.Category,
+			CreatedAt: createdAt,
+			UpdatedAt: updatedAt,
+		})
+	}
+
+	return entity.TransactionGetResponseWithPagination{
+		Data: transactionsWithUser,
+		Pagination: entity.Pagination{
+			TotalData: int(transactionResp.TotalCount),
+			TotalPage: (int(transactionResp.TotalCount) + request.Size - 1) / request.Size,
+			PageSize:  request.Size,
+			Page:      request.Page,
+		},
+	}, nil
+}
+
+func convertTimestampToTime(timestamp *timestamppb.Timestamp) *time.Time {
+	if timestamp == nil {
+		return nil
+	}
+	t := timestamp.AsTime()
+	return &t
+}
+
 func (svc *AggregatorService) GetUser(ctx context.Context, id int) (entity.UserResponse, error) {
 	userId := int32(id)
 	userResp, err := svc.userService.GetUserByID(ctx, &user_service.GetUserByIDRequest{Id: userId})
@@ -82,12 +142,4 @@ func (svc *AggregatorService) GetUser(ctx context.Context, id int) (entity.UserR
 		UpdatedAt: convertTimestampToTime(userResp.User.UpdatedAt),
 	}
 	return user, nil
-}
-
-func convertTimestampToTime(timestamp *timestamppb.Timestamp) *time.Time {
-	if timestamp == nil {
-		return nil
-	}
-	t := timestamp.AsTime()
-	return &t
 }

@@ -13,6 +13,7 @@ type IAggregatorHandler interface {
 	GetUser(c *gin.Context)
 	TopupTransaction(c *gin.Context)
 	TransferTransaction(c *gin.Context)
+	GetTransactions(c *gin.Context)
 }
 
 type AggregatorHandler struct {
@@ -65,6 +66,36 @@ func (h *AggregatorHandler) TransferTransaction(c *gin.Context) {
 	}
 	transaction, err := h.aggregatorService.TransferTransaction(c.Request.Context(), request)
 	log.Println(transaction)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	c.JSON(http.StatusOK, transaction)
+}
+
+func (h *AggregatorHandler) GetTransactions(c *gin.Context) {
+	userID, err := strconv.Atoi(c.Query("userID"))
+	if err != nil {
+		userID = 0 // set default value or handle error as per requirement
+	}
+
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		page = 1 // set default value or handle error as per requirement
+	}
+
+	size, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		size = 10 // set default value or handle error as per requirement
+	}
+
+	paramRequest := entity.TransactionGetRequest{
+		Type:   c.Query("type"),
+		UserID: userID,
+		Page:   page,
+		Size:   size,
+	}
+	transaction, err := h.aggregatorService.GetTransactions(c.Request.Context(), paramRequest)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
