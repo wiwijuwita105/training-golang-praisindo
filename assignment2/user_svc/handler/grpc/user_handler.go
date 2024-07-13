@@ -47,6 +47,7 @@ func (u *UserHandler) GetUsers(ctx context.Context, _ *emptypb.Empty) (*pb.GetUs
 		Users: usersProto,
 	}, nil
 }
+
 func (u *UserHandler) GetUserByID(ctx context.Context, req *pb.GetUserByIDRequest) (*pb.GetUserByIDResponse, error) {
 	user, err := u.userService.GetUserByID(ctx, int(req.GetId()))
 	if err != nil {
@@ -76,5 +77,6 @@ func (u *UserHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	}
 	return &pb.MutationResponse{
 		Message: fmt.Sprintf("Success created user with ID %d", createdUser.ID),
+		Id:      int32(createdUser.ID),
 	}, nil
 }

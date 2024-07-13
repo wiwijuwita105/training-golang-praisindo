@@ -40,4 +40,5 @@ service UserService {
   
   message MutationResponse {
     string message = 1;
+    int32 id = 2;
   }
