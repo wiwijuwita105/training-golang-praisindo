@@ -11,6 +11,7 @@ import (
 
 type IAggregatorHandler interface {
 	GetUser(c *gin.Context)
+	CreateUser(c *gin.Context)
 	TopupTransaction(c *gin.Context)
 	TransferTransaction(c *gin.Context)
 	GetTransactions(c *gin.Context)
@@ -39,6 +40,22 @@ func (h *AggregatorHandler) GetUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
+}
+
+func (h *AggregatorHandler) CreateUser(c *gin.Context) {
+	var request entity.UserCreateRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		errMsg := err.Error()
+		c.JSON(http.StatusBadRequest, gin.H{"error": errMsg})
+		return
+	}
+
+	_, err := h.aggregatorService.CreateUser(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"error": "User created successfully"})
 }
 
 func (h *AggregatorHandler) TopupTransaction(c *gin.Context) {

@@ -42,6 +42,10 @@
       "properties": {
         "message": {
           "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

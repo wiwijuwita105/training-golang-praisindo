@@ -10,6 +10,7 @@ func SetupRouter(r *gin.Engine, aggregator handler.IAggregatorHandler) {
 	userEndpoint := r.Group("/user")
 	userEndpoint.Use(middleware.AuthMiddleware())
 	userEndpoint.GET("/:userId", aggregator.GetUser)
+	userEndpoint.POST("/", aggregator.CreateUser)
 
 	transactionEndpoint := r.Group("/transaction")
 	transactionEndpoint.Use(middleware.AuthMiddleware())

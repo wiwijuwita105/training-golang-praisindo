@@ -8,11 +8,13 @@ import (
 	"context"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
+	"strconv"
 	"time"
 )
 
 type IAggregatorService interface {
 	GetUser(ctx context.Context, id int) (entity.UserResponse, error)
+	CreateUser(ctx context.Context, request entity.UserCreateRequest) (entity.UserResponse, error)
 	TopupTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error)
 	TransferTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error)
 	GetTransactions(ctx context.Context, param entity.TransactionGetRequest) (entity.TransactionGetResponseWithPagination, error)
@@ -38,27 +40,37 @@ func (svc *AggregatorService) TopupTransaction(ctx context.Context, request enti
 		Type:   "topup",
 		Amount: float32(request.Amount),
 	})
+
 	if err != nil {
 		return entity.TransactionResponse{}, err
 	}
-	log.Println(transactionResp)
+
 	return entity.TransactionResponse{Message: transactionResp.Message}, nil
 }
 
 func (svc *AggregatorService) TransferTransaction(ctx context.Context, request entity.TransactionRequest) (entity.TransactionResponse, error) {
-	log.Println(request)
+	//Get Balance User sender
+	walletResp, err := svc.walletService.GetWalletByUserID(ctx, &wallet_service.GetWalletByUserIDRequest{UserID: request.FromID})
+	if err != nil {
+		return entity.TransactionResponse{Message: "Wallet Not Fount"}, err
+	}
+
+	if walletResp.Wallet.Balance < float32(request.Amount) {
+		return entity.TransactionResponse{Message: "The balance is not enough. Your balance: " + strconv.FormatFloat(float64(walletResp.Wallet.Balance), 'f', 2, 64)}, err
+	}
+
+	//create transaction
 	transactionResp, err := svc.transactionService.CreateTransaction(ctx, &transaction_service.CreateTransactionRequest{
 		FromID: request.FromID,
 		ToID:   int32(request.ToID),
 		Type:   "transfer",
 		Amount: float32(request.Amount),
 	})
-	log.Println(transactionResp)
-	log.Println(err)
+
 	if err != nil {
 		return entity.TransactionResponse{}, err
 	}
-	log.Println(transactionResp)
+
 	return entity.TransactionResponse{Message: transactionResp.Message}, nil
 }
 
@@ -142,4 +154,28 @@ func (svc *AggregatorService) GetUser(ctx context.Context, id int) (entity.UserR
 		UpdatedAt: convertTimestampToTime(userResp.User.UpdatedAt),
 	}
 	return user, nil
+}
+
+func (svc *AggregatorService) CreateUser(ctx context.Context, request entity.UserCreateRequest) (entity.UserResponse, error) {
+	//create user
+	createUser, err := svc.userService.CreateUser(ctx, &user_service.CreateUserRequest{
+		Name:  request.Name,
+		Email: request.Email,
+	})
+	if err != nil {
+		return entity.UserResponse{}, err
+	}
+
+	//create wallet for balance
+	_, err = svc.walletService.CreateWallet(ctx, &wallet_service.CreateWalletRequest{
+		UserID:  createUser.Id,
+		Balance: 0,
+	})
+	if err != nil {
+		return entity.UserResponse{}, err
+	}
+
+	return entity.UserResponse{
+		ID: createUser.Id,
+	}, nil
 }
