@@ -47,6 +47,7 @@ func (u *WalletHandler) GetWallets(ctx context.Context, _ *emptypb.Empty) (*pb.G
 		Wallets: walletsProto,
 	}, nil
 }
+
 func (u *WalletHandler) GetWalletByUserID(ctx context.Context, req *pb.GetWalletByUserIDRequest) (*pb.GetWalletByUserIDResponse, error) {
 	wallet, err := u.walletService.GetWalletByUserID(ctx, int(req.GetUserID()))
 	if err != nil {

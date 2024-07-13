@@ -30,7 +30,6 @@ func NewTransactionService(transactionRepo ITransactionRepository, walletRepo IW
 }
 
 func (s *transactionService) CreateTransaction(ctx context.Context, transaction *entity.TransactionRequest) (entity.Transaction, error) {
-	log.Println(transaction)
 	if transaction.Type == "topup" {
 		//create transaction
 		userId := transaction.ToID
