@@ -40,7 +40,10 @@ func (u *TransactionHandler) CreateTransaction(ctx context.Context, req *pb.Crea
 
 func (u *TransactionHandler) GetTransactions(ctx context.Context, req *pb.GetTransactionRequest) (*pb.GetTransactionResponse, error) {
 	transactions, err := u.transactionService.GetAllTransactions(ctx, entity.TransactionGetRequest{
-		Type: req.GetType(),
+		Type:   req.GetType(),
+		UserID: int(req.GetUserID()),
+		Size:   int(req.GetPageSize()),
+		Page:   int(req.GetPage()),
 	})
 	if err != nil {
 		log.Println(err)
@@ -48,7 +51,7 @@ func (u *TransactionHandler) GetTransactions(ctx context.Context, req *pb.GetTra
 	}
 
 	var transactionProto []*pb.Transaction
-	for _, transaction := range transactions {
+	for _, transaction := range transactions.Transaction {
 		transactionProto = append(transactionProto, &pb.Transaction{
 			Id:        int32(transaction.ID),
 			UserID:    int32(transaction.UserID),
@@ -62,5 +65,6 @@ func (u *TransactionHandler) GetTransactions(ctx context.Context, req *pb.GetTra
 
 	return &pb.GetTransactionResponse{
 		Transactions: transactionProto,
+		TotalCount:   int32(transactions.CountData),
 	}, nil
 }

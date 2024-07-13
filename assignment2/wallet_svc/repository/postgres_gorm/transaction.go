@@ -25,15 +25,24 @@ func (r *transactionRepository) CreateTransaction(ctx context.Context, transacti
 	return *transaction, nil
 }
 
-func (r *transactionRepository) GetAllTransactions(ctx context.Context, param entity.TransactionGetRequest) ([]entity.Transaction, error) {
-	log.Println(param.Type)
+func (r *transactionRepository) GetAllTransactions(ctx context.Context, param entity.TransactionGetRequest) ([]entity.Transaction, int64, error) {
 	var transactions []entity.Transaction
-	if err := r.db.WithContext(ctx).Where("type = ?", param.Type).Find(&transactions).Error; err != nil {
+	var totalCount int64
+
+	// Query to get total count
+	if err := r.db.WithContext(ctx).Model(&entity.Transaction{}).Where("type = ? AND user_id = ?", param.Type, param.UserID).Count(&totalCount).Error; err != nil {
+		log.Printf("Error getting total count of transactions: %v\n", err)
+		return nil, 0, err
+	}
+
+	//Query to get data using pagination
+	offset := (param.Page - 1) * param.Size
+	if err := r.db.WithContext(ctx).Where("type = ? AND user_id = ?", param.Type, param.UserID).Limit(param.Size).Offset(offset).Find(&transactions).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return transactions, nil
+			return transactions, 0, nil
 		}
 		log.Printf("Error getting all wallets: %v\n", err)
-		return nil, err
+		return nil, 0, err
 	}
-	return transactions, nil
+	return transactions, totalCount, nil
 }

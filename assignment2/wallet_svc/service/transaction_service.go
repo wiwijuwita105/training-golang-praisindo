@@ -9,12 +9,12 @@ import (
 
 type ITransactionService interface {
 	CreateTransaction(ctx context.Context, transaction *entity.TransactionRequest) (entity.Transaction, error)
-	GetAllTransactions(ctx context.Context, transaction entity.TransactionGetRequest) ([]entity.Transaction, error)
+	GetAllTransactions(ctx context.Context, transaction entity.TransactionGetRequest) (entity.TransactionResponse, error)
 }
 
 type ITransactionRepository interface {
 	CreateTransaction(ctx context.Context, transaction *entity.Transaction) (entity.Transaction, error)
-	GetAllTransactions(ctx context.Context, transaction entity.TransactionGetRequest) ([]entity.Transaction, error)
+	GetAllTransactions(ctx context.Context, transaction entity.TransactionGetRequest) ([]entity.Transaction, int64, error)
 }
 
 type transactionService struct {
@@ -120,10 +120,15 @@ func (s *transactionService) CreateTransaction(ctx context.Context, transaction 
 
 }
 
-func (s *transactionService) GetAllTransactions(ctx context.Context, param entity.TransactionGetRequest) ([]entity.Transaction, error) {
-	transactions, err := s.transactionRepo.GetAllTransactions(ctx, param)
+func (s *transactionService) GetAllTransactions(ctx context.Context, param entity.TransactionGetRequest) (entity.TransactionResponse, error) {
+	transactions, totalCount, err := s.transactionRepo.GetAllTransactions(ctx, param)
+
 	if err != nil {
-		return nil, fmt.Errorf("gagal mendapatkan semua wallet: %v", err)
+		return entity.TransactionResponse{}, fmt.Errorf("gagal mendapatkan transaction: %v", err)
 	}
-	return transactions, nil
+
+	return entity.TransactionResponse{
+		Transaction: transactions,
+		CountData:   totalCount,
+	}, nil
 }

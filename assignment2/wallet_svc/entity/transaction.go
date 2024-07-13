@@ -21,5 +21,25 @@ type TransactionRequest struct {
 }
 
 type TransactionGetRequest struct {
-	Type string `json:"type" name:"type"`
+	Type   string `json:"type" name:"type"`
+	UserID int    `json:"userID" name:"userID"`
+	Size   int    `json:"size" name:"size"`
+	Page   int    `json:"page" name:"page"`
+}
+
+type TransactionResponse struct {
+	Transaction []Transaction `json:"transaction"`
+	CountData   int64         `json:"countData"`
+}
+
+type Pagination struct {
+	TotalData int `json:"total_data"`
+	TotalPage int `json:"total_page"`
+	PageSize  int `json:"page_size"`
+	Page      int `json:"page"`
+}
+
+type TransactionGetResponseWithPagination struct {
+	Data       []Transaction `json:"data"`
+	Pagination Pagination    `json:"pagination"`
 }

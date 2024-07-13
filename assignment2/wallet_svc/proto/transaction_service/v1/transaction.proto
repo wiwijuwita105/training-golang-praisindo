@@ -24,10 +24,14 @@ message Transaction {
 
 message GetTransactionRequest {
   string type = 1;
+  int32 userID  = 2;
+  int32 page_size = 3;
+  int32 page =4;
 }
 
 message GetTransactionResponse {
   repeated Transaction transactions = 1;
+  int32 total_count = 2;
 }
 
 message CreateTransactionRequest {
