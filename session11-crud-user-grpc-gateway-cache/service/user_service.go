@@ -84,6 +84,15 @@ func (s *userService) GetUserByID(ctx context.Context, id int) (entity.User, err
 			log.Println("gagal ambil data di database")
 			return entity.User{}, fmt.Errorf("gagal mendapatkan pengguna berdasarkan ID: %v", err)
 		}
+
+		createdUserJSON, err := json.Marshal(user)
+		if err != nil {
+			log.Println("gagal marshal json")
+		}
+		if err := s.rdb.Set(ctx, redisKey, createdUserJSON, 60*time.Second).Err(); err != nil {
+			log.Println("error when set redis key", redisKey)
+		}
+
 	}
 
 	return user, nil
