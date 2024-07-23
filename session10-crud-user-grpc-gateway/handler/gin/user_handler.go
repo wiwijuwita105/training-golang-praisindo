@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"log"
 	"net/http"
 	"session10-crud-user-grpc-gateway/entity"
 	"strconv"
@@ -51,6 +52,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 // GetUser menghandle permintaan untuk mendapatkan user berdasarkan ID
 func (h *UserHandler) GetUser(c *gin.Context) {
+	log.Println("-----Handler gin-------")
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})

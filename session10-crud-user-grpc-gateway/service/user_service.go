@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"session10-crud-user-grpc-gateway/entity"
 )
@@ -48,6 +49,7 @@ func (s *userService) CreateUser(ctx context.Context, user *entity.User) (entity
 // GetUserByID mendapatkan pengguna berdasarkan ID
 func (s *userService) GetUserByID(ctx context.Context, id int) (entity.User, error) {
 	// Memanggil GetUserByID dari repository untuk mendapatkan pengguna berdasarkan ID
+	log.Println("-----service-------")
 	user, err := s.userRepo.GetUserByID(ctx, id)
 	if err != nil {
 		return entity.User{}, fmt.Errorf("gagal mendapatkan pengguna berdasarkan ID: %v", err)
