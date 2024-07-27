@@ -1,0 +1,96 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "proto/shortlink/v1/shortlink.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "proto.shortlink_service.v1.ShortlinkService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/shortlink": {
+      "post": {
+        "operationId": "CreateShortlink",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/proto.shortlink_service.v1.MutationResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/proto.shortlink_service.v1.CreateShortlinkRequest"
+            }
+          }
+        ],
+        "tags": [
+          "proto.shortlink_service.v1.ShortlinkService"
+        ]
+      }
+    },
+    "/v1/{shortlink}": {
+      "get": {
+        "operationId": "GetLongUrl",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/proto.shortlink_service.v1.GetLongUrlResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shortlink",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "proto.shortlink_service.v1.ShortlinkService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "proto.shortlink_service.v1.CreateShortlinkRequest": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "proto.shortlink_service.v1.GetLongUrlResponse": {
+      "type": "object",
+      "properties": {
+        "longUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "proto.shortlink_service.v1.MutationResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

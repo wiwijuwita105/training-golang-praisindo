@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shortlink:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=db_assignment3_shortlink
+      - DB_PORT=5432
+      - REDIS_ADDR=redis:6379
+    command: [ "sh", "-c", "echo $DB_HOST && echo $DB_USER && echo $DB_PASSWORD && echo $DB_NAME && echo $DB_PORT && echo $REDIS_ADDR && ./shortlink" ]
+
+  redis:
+    image: redis:5.0.12
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=db_assignment3_shortlink
+    ports:
+      - "5432:5432"

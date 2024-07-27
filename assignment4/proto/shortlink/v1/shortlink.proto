@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option go_package = "assignment3/proto/shortlink/v1;shortlink";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+package proto.shortlink_service.v1;
+
+service ShortlinkService {
+  rpc CreateShortlink (CreateShortlinkRequest) returns (MutationResponse) {
+    option (google.api.http) = {
+      post: "/v1/shortlink",
+      body: "*"
+    };
+  }
+
+  rpc GetLongUrl(GetLongUrlRequest) returns (GetLongUrlResponse) {
+    option (google.api.http) = {
+      get: "/v1/{shortlink}"
+    };
+  }
+}
+
+message Shortlink {
+  int32 id = 1;
+  string shortlink = 2;
+  string url = 3;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message CreateShortlinkRequest {
+  string url = 1;
+}
+
+message MutationResponse {
+  string message = 1;
+}
+
+message GetLongUrlRequest {
+  string shortlink = 1;
+}
+
+message GetLongUrlResponse {
+  string long_url = 1;
+}
