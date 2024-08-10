@@ -8,8 +8,9 @@ const (
 
 	PostgresUser     = "postgres"
 	PostgresPassword = "postgres"
-	PostgresHost     = "postgres"
-	PostgresPort     = "5432"
-	PostgresSSLMode  = "disable"
-	PostgresDB       = "db_assignment5"
+	//PostgresHost     = "postgres"
+	PostgresHost    = "localhost"
+	PostgresPort    = "5432"
+	PostgresSSLMode = "disable"
+	PostgresDB      = "db_assignment5"
 )

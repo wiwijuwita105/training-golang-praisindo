@@ -1,0 +1,162 @@
+syntax = "proto3";
+option go_package = "assigment5/internal/proto/wallet_service/v1;wallet";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+package internal.proto.wallet_service.v1;
+
+service walletService {
+  rpc GetWallets (google.protobuf.Empty) returns (GetWalletsResponse) {
+    option (google.api.http) = {
+      get: "/v1/wallets"
+    };
+  }
+  rpc GetWalletByID (GetWalletByIDRequest) returns (GetWalletByIDResponse) {
+    option (google.api.http) = {
+      get: "/v1/wallets/{id}"
+    };
+  }
+  rpc CreateWallet (CreateWalletRequest) returns (MutationResponse) {
+    option (google.api.http) = {
+      post: "/v1/wallets",
+      body: "*"
+    };
+  }
+  rpc UpdateWallet (UpdateWalletRequest) returns (MutationResponse) {
+    option (google.api.http) = {
+      put: "/v1/wallets/{id}",
+      body: "*"
+    };
+  }
+  rpc DeleteWallet (DeleteWalletRequest) returns (MutationResponse) {
+    option (google.api.http) = {
+      delete: "/v1/wallets/{id}",
+      body: "*"
+    };
+  }
+  rpc GetCategories (google.protobuf.Empty) returns (GetCategoriesResponse) {
+    option (google.api.http) = {
+      get: "/v1/categories"
+    };
+  }
+  rpc GetCategoryByID (GetCategoryByIDRequest) returns (GetCategoryByIDResponse) {
+    option (google.api.http) = {
+      get: "/v1/categories/{id}"
+    };
+  }
+  rpc CreateCategory (CreateCategoryRequest) returns (MutationCategoryResponse) {
+    option (google.api.http) = {
+      post: "/v1/categories",
+      body: "*"
+    };
+  }
+  rpc UpdateCategory (UpdateCategoryRequest) returns (MutationCategoryResponse) {
+    option (google.api.http) = {
+      put: "/v1/categories/{id}",
+      body: "*"
+    };
+  }
+  rpc DeleteCategory (DeleteCategoryRequest) returns (MutationCategoryResponse) {
+      option (google.api.http) = {
+        delete: "/v1/categories/{id}",
+        body: "*"
+      };
+    }
+  rpc TransferWallet (TransferRequest) returns (MutationTransferResponse) {
+    option (google.api.http) = {
+      post: "/v1/transfer",
+      body: "*"
+    };
+  }
+}
+  
+message Wallet {
+  int32 id = 1;
+  int32 userID = 2;
+  float balance = 3;
+  string name = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message GetWalletsResponse {
+  repeated Wallet wallets = 1;
+}
+
+message GetWalletByIDRequest {
+  int32 id = 1;
+}
+
+message GetWalletByIDResponse {
+  Wallet wallet = 1;
+}
+
+message CreateWalletRequest {
+  int32 userID = 1;
+  float balance = 2;
+  string name = 3;
+}
+
+message UpdateWalletRequest {
+  int32 id = 1;
+  float balance = 2;
+}
+
+message DeleteWalletRequest {
+  int32 id = 1;
+}
+
+message MutationResponse {
+  string message = 1;
+}
+
+message Category {
+  int32 id = 1;
+  string name = 2;
+  string type = 3;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message GetCategoriesResponse {
+  repeated Category Categories = 1;
+}
+
+message GetCategoryByIDRequest {
+  int32 id = 1;
+}
+
+message GetCategoryByIDResponse {
+  Category category = 1;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string type = 2;
+}
+
+message UpdateCategoryRequest {
+  int32 id = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message DeleteCategoryRequest {
+  int32 id = 1;
+}
+
+message MutationCategoryResponse {
+  string message = 1;
+}
+
+message TransferRequest {
+  int32 toID = 1;
+  int32 fromID = 2;
+  float nominal = 3;
+}
+
+message MutationTransferResponse {
+  string message = 1;
+}
