@@ -2,6 +2,7 @@ package postgres_gorm
 
 import (
 	"assignment5/cashflow-svc/internal/entity"
+	"assignment5/cashflow-svc/internal/model"
 	"context"
 	"errors"
 	"log"
@@ -16,7 +17,7 @@ type transactionRepository struct {
 type ITransactionRepository interface {
 	CreateTransaction(ctx context.Context, transaction *entity.Transaction) (entity.Transaction, error)
 	GetTransactionByID(ctx context.Context, id int) (entity.Transaction, error)
-	GetAllTransactions(ctx context.Context) ([]entity.Transaction, error)
+	GetAllTransactions(ctx context.Context, filter model.FilterTransaction) ([]entity.Transaction, error)
 	DeleteTransaction(ctx context.Context, id int) error
 }
 
@@ -50,15 +51,21 @@ func (r *transactionRepository) GetTransactionByID(ctx context.Context, id int) 
 }
 
 // GetAllWalletss mengambil semua wallet dari basis data
-func (r *transactionRepository) GetAllTransactions(ctx context.Context) ([]entity.Transaction, error) {
+func (r *transactionRepository) GetAllTransactions(ctx context.Context, filter model.FilterTransaction) ([]entity.Transaction, error) {
 	var transactions []entity.Transaction
-	if err := r.db.WithContext(ctx).Find(&transactions).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Where("wallet_id IN ?", filter.WalletID).
+		Where("transaction_date BETWEEN ? AND ?", filter.StartTime, filter.EndTime).
+		Preload("Wallet").
+		Preload("Category").
+		Find(&transactions).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return transactions, nil
 		}
 		log.Printf("Error getting all wallets: %v\n", err)
 		return nil, err
 	}
+	//log.Fatalln(transactions)
 	return transactions, nil
 }
 

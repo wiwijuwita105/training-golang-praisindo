@@ -20,6 +20,7 @@ type IWalletRepository interface {
 	GetAllWallets(ctx context.Context) ([]entity.Wallet, error)
 	UpdateWallet(ctx context.Context, id int, wallet entity.Wallet) (entity.Wallet, error)
 	DeleteWallet(ctx context.Context, id int) error
+	GetWalletByUserID(ctx context.Context, userID int) ([]entity.Wallet, error)
 }
 
 // NewWalletRepository membuat instance baru dari walletRepository
@@ -86,4 +87,18 @@ func (r *walletRepository) DeleteWallet(ctx context.Context, id int) error {
 		return err
 	}
 	return nil
+}
+
+func (r *walletRepository) GetWalletByUserID(ctx context.Context, userID int) ([]entity.Wallet, error) {
+	var wallets []entity.Wallet
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userID).Find(&wallets).Error; err != nil {
+		log.Println(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []entity.Wallet{}, nil
+		}
+		log.Printf("Error getting wallet by user ID: %v\n", err)
+		return []entity.Wallet{}, err
+	}
+
+	return wallets, nil
 }

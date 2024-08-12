@@ -13,4 +13,7 @@ type Transaction struct {
 	ToWalletID      int       `json:"to_wallet_id" binding:"required"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
+
+	Wallet   Wallet              `gorm:"foreignKey:WalletID"`
+	Category TransactionCategory `gorm:"foreignKey:CategoryID"`
 }

@@ -6,6 +6,7 @@ import (
 	pbWallet "assignment5/cashflow-svc/internal/proto/wallet_service/v1"
 	"assignment5/cashflow-svc/internal/service"
 	"context"
+	"errors"
 	"fmt"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -184,5 +185,74 @@ func (u *WalletHandler) TransferWallet(ctx context.Context, req *pbWallet.Transf
 	}
 	return &pbWallet.MutationTransferResponse{
 		Message: fmt.Sprintf("Success transfer from wallet ID %d to wallet ID %d", req.FromID, req.ToID),
+	}, nil
+}
+
+func (u *WalletHandler) CreateTransaction(ctx context.Context, req *pbWallet.CreateTransactionRequest) (*pbWallet.MutationTransactionResponse, error) {
+	transaction, err := u.transactionService.CreateTransaction(ctx, model.TransactionRequest{
+		WalletID:   req.WalletID,
+		CategoryID: req.CategoryID,
+		Nominal:    float64(req.Nominal),
+	})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &pbWallet.MutationTransactionResponse{
+		Message: fmt.Sprintf("Success transfer with ID: %d", transaction.ID),
+	}, nil
+}
+
+func (u *WalletHandler) GetTransactions(ctx context.Context, req *pbWallet.GetTransactionRequest) (*pbWallet.GetTransactionResponse, error) {
+	var requestFilter model.FilterTransactionRequest
+	if req.WalletID == 0 {
+		if req.UserID == 0 {
+			return &pbWallet.GetTransactionResponse{}, errors.New("no user id or wallet id provided")
+		}
+	}
+	requestFilter.UserID = req.UserID
+	requestFilter.WalletID = req.WalletID
+	if req.StartDate != "" {
+		startDate, err := time.Parse("2006-01-02", req.StartDate)
+		if err != nil {
+			return &pbWallet.GetTransactionResponse{}, err
+		}
+		requestFilter.StartTime = &startDate
+	} else {
+		stratDate := time.Now().AddDate(0, 0, -30)
+		requestFilter.StartTime = &stratDate
+	}
+
+	if req.EndDate != "" {
+		endDate, err := time.Parse("2006-01-02", req.EndDate)
+		if err != nil {
+			return &pbWallet.GetTransactionResponse{}, err
+		}
+		requestFilter.EndTime = &endDate
+	} else {
+		endDate := time.Now()
+		requestFilter.EndTime = &endDate
+	}
+
+	transactions, err := u.transactionService.GetTransactions(ctx, requestFilter)
+	if err != nil {
+		return nil, err
+	}
+
+	var transactionProto []*pbWallet.Transaction
+	for _, record := range transactions {
+		transactionProto = append(transactionProto, &pbWallet.Transaction{
+			Id:              record.ID,
+			TransactionDate: timestamppb.New(record.TransactionDate),
+			Type:            record.Type,
+			Nominal:         float32(record.Nominal),
+			WalletID:        record.WalletID,
+			WalletName:      record.WalletName,
+			CategoryId:      record.CategoryID,
+			CategoryName:    record.CategoryName,
+		})
+	}
+	return &pbWallet.GetTransactionResponse{
+		Transactions: transactionProto,
 	}, nil
 }

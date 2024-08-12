@@ -70,6 +70,17 @@ service walletService {
       body: "*"
     };
   }
+  rpc CreateTransaction (CreateTransactionRequest) returns (MutationTransactionResponse) {
+    option (google.api.http) = {
+      post: "/v1/transaction",
+      body: "*"
+    };
+  }
+  rpc GetTransactions (GetTransactionRequest) returns (GetTransactionResponse) {
+    option (google.api.http) = {
+      get: "/v1/transaction"
+    };
+  }
 }
   
 message Wallet {
@@ -160,3 +171,36 @@ message TransferRequest {
 message MutationTransferResponse {
   string message = 1;
 }
+
+message CreateTransactionRequest {
+  int32 walletID = 1;
+  int32 categoryID = 2;
+  float nominal = 3;
+}
+
+message MutationTransactionResponse {
+  string message = 1;
+}
+
+message Transaction {
+  int32 id = 1;
+  int32 walletID = 2;
+  string walletName = 3;
+  string type = 4;
+  float nominal = 5;
+  int32 categoryId = 6;
+  string categoryName = 7;
+  google.protobuf.Timestamp transactionDate = 8;
+}
+
+message GetTransactionRequest {
+  int32 userID = 1;
+  int32 walletID = 2;
+  string start_date = 3;
+  string end_date = 4;
+}
+
+message GetTransactionResponse {
+  repeated Transaction transactions = 1;
+}
+

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"assignment5/cashflow-svc/internal/config"
 	"assignment5/cashflow-svc/internal/entity"
 	"assignment5/cashflow-svc/internal/model"
 	"assignment5/cashflow-svc/internal/repository/postgres_gorm"
@@ -9,10 +10,13 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"log"
+	"time"
 )
 
 type ITransactionService interface {
 	TransferWallet(ctx context.Context, request model.TransferWalletRequest) (model.TransferWalletResponse, error)
+	CreateTransaction(ctx context.Context, request model.TransactionRequest) (entity.Transaction, error)
+	GetTransactions(ctx context.Context, request model.FilterTransactionRequest) ([]model.TransactionResponse, error)
 }
 
 type transactionService struct {
@@ -65,7 +69,7 @@ func (s *transactionService) TransferWallet(ctx context.Context, request model.T
 		var transactionOut = &entity.Transaction{
 			WalletID:        int(request.FromID),
 			Nominal:         request.Nominal,
-			Type:            "Withdrawal",
+			Type:            config.EXPENSE,
 			FromWalletID:    int(request.ToID),
 			ToWalletID:      senderWallet.ID,
 			TransactionDate: request.TransactionDate,
@@ -96,7 +100,7 @@ func (s *transactionService) TransferWallet(ctx context.Context, request model.T
 		transactionIn := &entity.Transaction{
 			WalletID:        int(request.ToID),
 			Nominal:         request.Nominal,
-			Type:            "Deposit",
+			Type:            config.INCOME,
 			FromWalletID:    int(request.FromID),
 			ToWalletID:      int(request.ToID),
 			TransactionDate: request.TransactionDate,
@@ -135,4 +139,107 @@ func (s *transactionService) TransferWallet(ctx context.Context, request model.T
 			TransactionOut:   saveTransactionOut,
 		}, err
 	}
+}
+
+func (s *transactionService) CreateTransaction(ctx context.Context, request model.TransactionRequest) (entity.Transaction, error) {
+	tx := s.db.WithContext(ctx).Begin()
+
+	getCategory, err := s.categoryRepo.GetCategoryByID(ctx, int(request.CategoryID))
+	if err != nil {
+		tx.Rollback()
+		return entity.Transaction{}, err
+	}
+
+	getWallet, err := s.walletRepo.GetWalletByID(ctx, int(request.WalletID))
+	if err != nil {
+		tx.Rollback()
+		return entity.Transaction{}, err
+	}
+
+	if getWallet.Balance < request.Nominal && getCategory.Type == config.EXPENSE {
+		tx.Rollback()
+		return entity.Transaction{}, errors.New("Insufficient balance to carry out transactions")
+	}
+
+	var idCategory = getCategory.ID
+	var inputTransaction = &entity.Transaction{
+		WalletID:        int(request.WalletID),
+		CategoryID:      &idCategory,
+		Type:            getCategory.Type,
+		Nominal:         request.Nominal,
+		TransactionDate: time.Now(),
+	}
+	insertTransaction, err := s.transactionRepo.CreateTransaction(ctx, inputTransaction)
+	if err != nil {
+		tx.Rollback()
+		return entity.Transaction{}, err
+	}
+
+	var lastBalance float64
+	if getCategory.Type == config.INCOME {
+		lastBalance = getWallet.Balance + request.Nominal
+	} else {
+		lastBalance = getWallet.Balance - request.Nominal
+	}
+
+	inputUpdateWallet := entity.Wallet{
+		Balance: lastBalance,
+	}
+	_, err = s.walletRepo.UpdateWallet(ctx, getWallet.ID, inputUpdateWallet)
+	if err != nil {
+		tx.Rollback()
+		return entity.Transaction{}, err
+	}
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return entity.Transaction{}, err
+	}
+	return insertTransaction, nil
+}
+
+func (s *transactionService) GetTransactions(ctx context.Context, request model.FilterTransactionRequest) ([]model.TransactionResponse, error) {
+	filter := model.FilterTransaction{}
+	filter.StartTime = request.StartTime
+	filter.EndTime = request.EndTime
+	if request.WalletID != 0 {
+		filter.WalletID = []int32{request.WalletID}
+	} else {
+		//get wallet id by userID
+		getWallets, err := s.walletRepo.GetWalletByUserID(ctx, int(request.UserID))
+		if err != nil {
+			return nil, err
+		}
+		for _, wallet := range getWallets {
+			filter.WalletID = append(filter.WalletID, int32(wallet.ID))
+		}
+	}
+
+	getTransaction, err := s.transactionRepo.GetAllTransactions(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var transactions []model.TransactionResponse
+	for _, record := range getTransaction {
+		var categoryID int32
+		var categoryName string
+		if record.CategoryID != nil {
+			categoryID = int32(*record.CategoryID)
+			categoryName = record.Category.Name
+		} else {
+			categoryID = 0
+			categoryName = ""
+		}
+		transactions = append(transactions, model.TransactionResponse{
+			ID:              int32(record.ID),
+			TransactionDate: record.TransactionDate,
+			Type:            record.Type,
+			Nominal:         record.Nominal,
+			WalletID:        int32(record.WalletID),
+			WalletName:      record.Wallet.Name,
+			CategoryID:      categoryID,
+			CategoryName:    categoryName,
+		})
+	}
+	return transactions, nil
 }

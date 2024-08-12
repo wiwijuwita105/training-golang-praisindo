@@ -20,17 +20,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WalletService_GetWallets_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/GetWallets"
-	WalletService_GetWalletByID_FullMethodName   = "/internal.proto.wallet_service.v1.walletService/GetWalletByID"
-	WalletService_CreateWallet_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/CreateWallet"
-	WalletService_UpdateWallet_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/UpdateWallet"
-	WalletService_DeleteWallet_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/DeleteWallet"
-	WalletService_GetCategories_FullMethodName   = "/internal.proto.wallet_service.v1.walletService/GetCategories"
-	WalletService_GetCategoryByID_FullMethodName = "/internal.proto.wallet_service.v1.walletService/GetCategoryByID"
-	WalletService_CreateCategory_FullMethodName  = "/internal.proto.wallet_service.v1.walletService/CreateCategory"
-	WalletService_UpdateCategory_FullMethodName  = "/internal.proto.wallet_service.v1.walletService/UpdateCategory"
-	WalletService_DeleteCategory_FullMethodName  = "/internal.proto.wallet_service.v1.walletService/DeleteCategory"
-	WalletService_TransferWallet_FullMethodName  = "/internal.proto.wallet_service.v1.walletService/TransferWallet"
+	WalletService_GetWallets_FullMethodName        = "/internal.proto.wallet_service.v1.walletService/GetWallets"
+	WalletService_GetWalletByID_FullMethodName     = "/internal.proto.wallet_service.v1.walletService/GetWalletByID"
+	WalletService_CreateWallet_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/CreateWallet"
+	WalletService_UpdateWallet_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/UpdateWallet"
+	WalletService_DeleteWallet_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/DeleteWallet"
+	WalletService_GetCategories_FullMethodName     = "/internal.proto.wallet_service.v1.walletService/GetCategories"
+	WalletService_GetCategoryByID_FullMethodName   = "/internal.proto.wallet_service.v1.walletService/GetCategoryByID"
+	WalletService_CreateCategory_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/CreateCategory"
+	WalletService_UpdateCategory_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/UpdateCategory"
+	WalletService_DeleteCategory_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/DeleteCategory"
+	WalletService_TransferWallet_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/TransferWallet"
+	WalletService_CreateTransaction_FullMethodName = "/internal.proto.wallet_service.v1.walletService/CreateTransaction"
+	WalletService_GetTransactions_FullMethodName   = "/internal.proto.wallet_service.v1.walletService/GetTransactions"
 )
 
 // WalletServiceClient is the client API for WalletService service.
@@ -48,6 +50,8 @@ type WalletServiceClient interface {
 	UpdateCategory(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*MutationCategoryResponse, error)
 	DeleteCategory(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*MutationCategoryResponse, error)
 	TransferWallet(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*MutationTransferResponse, error)
+	CreateTransaction(ctx context.Context, in *CreateTransactionRequest, opts ...grpc.CallOption) (*MutationTransactionResponse, error)
+	GetTransactions(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error)
 }
 
 type walletServiceClient struct {
@@ -168,6 +172,26 @@ func (c *walletServiceClient) TransferWallet(ctx context.Context, in *TransferRe
 	return out, nil
 }
 
+func (c *walletServiceClient) CreateTransaction(ctx context.Context, in *CreateTransactionRequest, opts ...grpc.CallOption) (*MutationTransactionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MutationTransactionResponse)
+	err := c.cc.Invoke(ctx, WalletService_CreateTransaction_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletServiceClient) GetTransactions(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTransactionResponse)
+	err := c.cc.Invoke(ctx, WalletService_GetTransactions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WalletServiceServer is the server API for WalletService service.
 // All implementations must embed UnimplementedWalletServiceServer
 // for forward compatibility.
@@ -183,6 +207,8 @@ type WalletServiceServer interface {
 	UpdateCategory(context.Context, *UpdateCategoryRequest) (*MutationCategoryResponse, error)
 	DeleteCategory(context.Context, *DeleteCategoryRequest) (*MutationCategoryResponse, error)
 	TransferWallet(context.Context, *TransferRequest) (*MutationTransferResponse, error)
+	CreateTransaction(context.Context, *CreateTransactionRequest) (*MutationTransactionResponse, error)
+	GetTransactions(context.Context, *GetTransactionRequest) (*GetTransactionResponse, error)
 	mustEmbedUnimplementedWalletServiceServer()
 }
 
@@ -225,6 +251,12 @@ func (UnimplementedWalletServiceServer) DeleteCategory(context.Context, *DeleteC
 }
 func (UnimplementedWalletServiceServer) TransferWallet(context.Context, *TransferRequest) (*MutationTransferResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TransferWallet not implemented")
+}
+func (UnimplementedWalletServiceServer) CreateTransaction(context.Context, *CreateTransactionRequest) (*MutationTransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTransaction not implemented")
+}
+func (UnimplementedWalletServiceServer) GetTransactions(context.Context, *GetTransactionRequest) (*GetTransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTransactions not implemented")
 }
 func (UnimplementedWalletServiceServer) mustEmbedUnimplementedWalletServiceServer() {}
 func (UnimplementedWalletServiceServer) testEmbeddedByValue()                       {}
@@ -445,6 +477,42 @@ func _WalletService_TransferWallet_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WalletService_CreateTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).CreateTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_CreateTransaction_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).CreateTransaction(ctx, req.(*CreateTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WalletService_GetTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).GetTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_GetTransactions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).GetTransactions(ctx, req.(*GetTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WalletService_ServiceDesc is the grpc.ServiceDesc for WalletService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -495,6 +563,14 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TransferWallet",
 			Handler:    _WalletService_TransferWallet_Handler,
+		},
+		{
+			MethodName: "CreateTransaction",
+			Handler:    _WalletService_CreateTransaction_Handler,
+		},
+		{
+			MethodName: "GetTransactions",
+			Handler:    _WalletService_GetTransactions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
