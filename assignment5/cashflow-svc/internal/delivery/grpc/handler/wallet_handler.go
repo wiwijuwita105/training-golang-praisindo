@@ -256,3 +256,124 @@ func (u *WalletHandler) GetTransactions(ctx context.Context, req *pbWallet.GetTr
 		Transactions: transactionProto,
 	}, nil
 }
+
+func (u *WalletHandler) GetLastTransactions(ctx context.Context, req *pbWallet.GetLastTransactionRequest) (*pbWallet.GetTransactionResponse, error) {
+	requestFilter := model.LastTransactionRequest{
+		UserID:   int(req.UserID),
+		WalletID: int(req.WalletID),
+	}
+
+	transactions, err := u.transactionService.GetLastTransactions(ctx, requestFilter)
+	if err != nil {
+		return nil, err
+	}
+
+	var transactionProto []*pbWallet.Transaction
+	for _, record := range transactions {
+		transactionProto = append(transactionProto, &pbWallet.Transaction{
+			Id:              record.ID,
+			TransactionDate: timestamppb.New(record.TransactionDate),
+			Type:            record.Type,
+			Nominal:         float32(record.Nominal),
+			WalletID:        record.WalletID,
+			WalletName:      record.WalletName,
+			CategoryId:      record.CategoryID,
+			CategoryName:    record.CategoryName,
+		})
+	}
+	return &pbWallet.GetTransactionResponse{
+		Transactions: transactionProto,
+	}, nil
+}
+
+func (u *WalletHandler) GetCashflowReport(ctx context.Context, req *pbWallet.GetCashflowReportRequest) (*pbWallet.GetCashflowReportResponse, error) {
+	var requestFilter model.CashFlowReportRequest
+	if req.WalletID == 0 {
+		if req.UserID == 0 {
+			return &pbWallet.GetCashflowReportResponse{}, errors.New("no user id or wallet id provided")
+		}
+	}
+	requestFilter.UserID = req.UserID
+	requestFilter.WalletID = req.WalletID
+	if req.StartDate != "" {
+		startDate, err := time.Parse("2006-01-02", req.StartDate)
+		if err != nil {
+			return &pbWallet.GetCashflowReportResponse{}, err
+		}
+		requestFilter.StartTime = &startDate
+	} else {
+		stratDate := time.Now().AddDate(0, 0, -30)
+		requestFilter.StartTime = &stratDate
+	}
+
+	if req.EndDate != "" {
+		endDate, err := time.Parse("2006-01-02", req.EndDate)
+		if err != nil {
+			return &pbWallet.GetCashflowReportResponse{}, err
+		}
+		requestFilter.EndTime = &endDate
+	} else {
+		endDate := time.Now()
+		requestFilter.EndTime = &endDate
+	}
+
+	cashflowReport, err := u.transactionService.GetCashflowReport(ctx, requestFilter)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbWallet.GetCashflowReportResponse{
+		In:  float32(cashflowReport.In),
+		Out: float32(cashflowReport.Out),
+	}, nil
+}
+
+func (u *WalletHandler) GetSummaryCategory(ctx context.Context, req *pbWallet.GetSummaryCategoryRequest) (*pbWallet.GetSummaryCategoryResponse, error) {
+	var requestFilter model.SummaryCategoryRequest
+	if req.WalletID == 0 {
+		if req.UserID == 0 {
+			return &pbWallet.GetSummaryCategoryResponse{}, errors.New("no user id or wallet id provided")
+		}
+	}
+	requestFilter.UserID = req.UserID
+	requestFilter.WalletID = req.WalletID
+	if req.StartDate != "" {
+		startDate, err := time.Parse("2006-01-02", req.StartDate)
+		if err != nil {
+			return &pbWallet.GetSummaryCategoryResponse{}, err
+		}
+		requestFilter.StartTime = &startDate
+	} else {
+		stratDate := time.Now().AddDate(0, 0, -30)
+		requestFilter.StartTime = &stratDate
+	}
+
+	if req.EndDate != "" {
+		endDate, err := time.Parse("2006-01-02", req.EndDate)
+		if err != nil {
+			return &pbWallet.GetSummaryCategoryResponse{}, err
+		}
+		requestFilter.EndTime = &endDate
+	} else {
+		endDate := time.Now()
+		requestFilter.EndTime = &endDate
+	}
+
+	summaryCategories, err := u.transactionService.GetSummaryCategory(ctx, requestFilter)
+	if err != nil {
+		return nil, err
+	}
+
+	var summaryCategoryProto []*pbWallet.SummaryCategory
+	for _, record := range summaryCategories {
+		summaryCategoryProto = append(summaryCategoryProto, &pbWallet.SummaryCategory{
+			CategoryID:   record.CategoryID,
+			CategoryName: record.CategoryName,
+			Type:         record.Type,
+			Amount:       float32(record.Amount),
+		})
+	}
+	return &pbWallet.GetSummaryCategoryResponse{
+		SummaryCategory: summaryCategoryProto,
+	}, nil
+}

@@ -81,6 +81,21 @@ service walletService {
       get: "/v1/transaction"
     };
   }
+  rpc GetLastTransactions (GetLastTransactionRequest) returns (GetTransactionResponse) {
+    option (google.api.http) = {
+      get: "/v1/lasttransaction"
+    };
+  }
+  rpc GetCashflowReport (GetCashflowReportRequest) returns (GetCashflowReportResponse) {
+    option (google.api.http) = {
+      get: "/v1/cashflowreport"
+    };
+  }
+  rpc GetSummaryCategory (GetSummaryCategoryRequest) returns (GetSummaryCategoryResponse) {
+    option (google.api.http) = {
+      get: "/v1/summarycategory"
+    };
+  }
 }
   
 message Wallet {
@@ -204,3 +219,37 @@ message GetTransactionResponse {
   repeated Transaction transactions = 1;
 }
 
+message GetLastTransactionRequest {
+  int32 userID = 1;
+  int32 walletID = 2;
+}
+
+message GetCashflowReportRequest {
+  int32 userID = 1;
+  int32 walletID = 2;
+  string start_date = 3;
+  string end_date = 4;
+}
+
+message GetCashflowReportResponse {
+  float in = 1;
+  float out = 2;
+}
+
+message GetSummaryCategoryRequest {
+  int32 userID = 1;
+  int32 walletID = 2;
+  string start_date = 3;
+  string end_date = 4;
+}
+
+message SummaryCategory {
+  int32 categoryID = 1;
+  string categoryName = 2;
+  string type = 3;
+  float amount = 4;
+}
+
+message GetSummaryCategoryResponse {
+  repeated SummaryCategory summaryCategory = 1;
+}

@@ -16,6 +16,50 @@
     "application/json"
   ],
   "paths": {
+    "/v1/cashflowreport": {
+      "get": {
+        "operationId": "GetCashflowReport",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/internal.proto.wallet_service.v1.GetCashflowReportResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "walletID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "internal.proto.wallet_service.v1.walletService"
+        ]
+      }
+    },
     "/v1/categories": {
       "get": {
         "operationId": "GetCategories",
@@ -136,6 +180,82 @@
             "schema": {
               "$ref": "#/definitions/internal.proto.wallet_service.v1.walletService.UpdateCategoryBody"
             }
+          }
+        ],
+        "tags": [
+          "internal.proto.wallet_service.v1.walletService"
+        ]
+      }
+    },
+    "/v1/lasttransaction": {
+      "get": {
+        "operationId": "GetLastTransactions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/internal.proto.wallet_service.v1.GetTransactionResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "walletID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "internal.proto.wallet_service.v1.walletService"
+        ]
+      }
+    },
+    "/v1/summarycategory": {
+      "get": {
+        "operationId": "GetSummaryCategory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/internal.proto.wallet_service.v1.GetSummaryCategoryResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "walletID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -433,6 +553,19 @@
         }
       }
     },
+    "internal.proto.wallet_service.v1.GetCashflowReportResponse": {
+      "type": "object",
+      "properties": {
+        "in": {
+          "type": "number",
+          "format": "float"
+        },
+        "out": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
     "internal.proto.wallet_service.v1.GetCategoriesResponse": {
       "type": "object",
       "properties": {
@@ -450,6 +583,18 @@
       "properties": {
         "category": {
           "$ref": "#/definitions/internal.proto.wallet_service.v1.Category"
+        }
+      }
+    },
+    "internal.proto.wallet_service.v1.GetSummaryCategoryResponse": {
+      "type": "object",
+      "properties": {
+        "summaryCategory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/internal.proto.wallet_service.v1.SummaryCategory"
+          }
         }
       }
     },
@@ -514,6 +659,25 @@
       "properties": {
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "internal.proto.wallet_service.v1.SummaryCategory": {
+      "type": "object",
+      "properties": {
+        "categoryID": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "categoryName": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
         }
       }
     },

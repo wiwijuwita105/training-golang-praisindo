@@ -17,6 +17,9 @@ type ITransactionService interface {
 	TransferWallet(ctx context.Context, request model.TransferWalletRequest) (model.TransferWalletResponse, error)
 	CreateTransaction(ctx context.Context, request model.TransactionRequest) (entity.Transaction, error)
 	GetTransactions(ctx context.Context, request model.FilterTransactionRequest) ([]model.TransactionResponse, error)
+	GetLastTransactions(ctx context.Context, request model.LastTransactionRequest) ([]model.TransactionResponse, error)
+	GetCashflowReport(ctx context.Context, request model.CashFlowReportRequest) (model.CashFlowReportResponse, error)
+	GetSummaryCategory(ctx context.Context, request model.SummaryCategoryRequest) ([]model.SummaryCategoryResponse, error)
 }
 
 type transactionService struct {
@@ -242,4 +245,116 @@ func (s *transactionService) GetTransactions(ctx context.Context, request model.
 		})
 	}
 	return transactions, nil
+}
+
+func (s *transactionService) GetLastTransactions(ctx context.Context, request model.LastTransactionRequest) ([]model.TransactionResponse, error) {
+	var walletIDs []int
+	if request.WalletID != 0 {
+		walletIDs = append(walletIDs, request.WalletID)
+	} else {
+		getWallets, err := s.walletRepo.GetWalletByUserID(ctx, int(request.UserID))
+		if err != nil {
+			return nil, err
+		}
+		for _, wallet := range getWallets {
+			walletIDs = append(walletIDs, wallet.ID)
+		}
+	}
+
+	getTransaction, err := s.transactionRepo.GetLastTransactions(ctx, walletIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	var transactions []model.TransactionResponse
+	for _, record := range getTransaction {
+		var categoryID int32
+		var categoryName string
+		if record.CategoryID != nil {
+			categoryID = int32(*record.CategoryID)
+			categoryName = record.Category.Name
+		} else {
+			categoryID = 0
+			categoryName = ""
+		}
+		transactions = append(transactions, model.TransactionResponse{
+			ID:              int32(record.ID),
+			TransactionDate: record.TransactionDate,
+			Type:            record.Type,
+			Nominal:         record.Nominal,
+			WalletID:        int32(record.WalletID),
+			WalletName:      record.Wallet.Name,
+			CategoryID:      categoryID,
+			CategoryName:    categoryName,
+		})
+	}
+	return transactions, nil
+}
+
+func (s *transactionService) GetCashflowReport(ctx context.Context, request model.CashFlowReportRequest) (model.CashFlowReportResponse, error) {
+	filter := model.FilterTransaction{}
+	filter.StartTime = request.StartTime
+	filter.EndTime = request.EndTime
+	if request.WalletID != 0 {
+		filter.WalletID = []int32{request.WalletID}
+	} else {
+		//get wallet id by userID
+		getWallets, err := s.walletRepo.GetWalletByUserID(ctx, int(request.UserID))
+		if err != nil {
+			return model.CashFlowReportResponse{}, err
+		}
+		for _, wallet := range getWallets {
+			filter.WalletID = append(filter.WalletID, int32(wallet.ID))
+		}
+	}
+
+	result, err := s.transactionRepo.GetCashflowReport(ctx, filter)
+	if err != nil {
+		return model.CashFlowReportResponse{}, err
+	}
+	var output model.CashFlowReportResponse
+	for _, record := range result {
+		if record.Type == "Income" {
+			output.In = record.Total
+		}
+		if record.Type == "Expense" {
+			output.Out = record.Total
+		}
+	}
+	return output, nil
+}
+
+func (s *transactionService) GetSummaryCategory(ctx context.Context, request model.SummaryCategoryRequest) ([]model.SummaryCategoryResponse, error) {
+	filter := model.FilterTransaction{}
+	filter.StartTime = request.StartTime
+	filter.EndTime = request.EndTime
+	if request.WalletID != 0 {
+		filter.WalletID = []int32{request.WalletID}
+	} else {
+		//get wallet id by userID
+		getWallets, err := s.walletRepo.GetWalletByUserID(ctx, int(request.UserID))
+		if err != nil {
+			return nil, err
+		}
+		for _, wallet := range getWallets {
+			filter.WalletID = append(filter.WalletID, int32(wallet.ID))
+		}
+	}
+
+	getSummaryCategory, err := s.transactionRepo.GetSummaryCategory(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var summaryCategories []model.SummaryCategoryResponse
+	for _, record := range getSummaryCategory {
+
+		summaryCategories = append(summaryCategories, model.SummaryCategoryResponse{
+			CategoryID:   record.CategoryID,
+			CategoryName: record.CategoryName,
+			Type:         record.Type,
+			Amount:       record.Amount,
+		})
+	}
+	return summaryCategories, nil
 }

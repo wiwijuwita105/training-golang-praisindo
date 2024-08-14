@@ -20,19 +20,22 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WalletService_GetWallets_FullMethodName        = "/internal.proto.wallet_service.v1.walletService/GetWallets"
-	WalletService_GetWalletByID_FullMethodName     = "/internal.proto.wallet_service.v1.walletService/GetWalletByID"
-	WalletService_CreateWallet_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/CreateWallet"
-	WalletService_UpdateWallet_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/UpdateWallet"
-	WalletService_DeleteWallet_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/DeleteWallet"
-	WalletService_GetCategories_FullMethodName     = "/internal.proto.wallet_service.v1.walletService/GetCategories"
-	WalletService_GetCategoryByID_FullMethodName   = "/internal.proto.wallet_service.v1.walletService/GetCategoryByID"
-	WalletService_CreateCategory_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/CreateCategory"
-	WalletService_UpdateCategory_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/UpdateCategory"
-	WalletService_DeleteCategory_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/DeleteCategory"
-	WalletService_TransferWallet_FullMethodName    = "/internal.proto.wallet_service.v1.walletService/TransferWallet"
-	WalletService_CreateTransaction_FullMethodName = "/internal.proto.wallet_service.v1.walletService/CreateTransaction"
-	WalletService_GetTransactions_FullMethodName   = "/internal.proto.wallet_service.v1.walletService/GetTransactions"
+	WalletService_GetWallets_FullMethodName          = "/internal.proto.wallet_service.v1.walletService/GetWallets"
+	WalletService_GetWalletByID_FullMethodName       = "/internal.proto.wallet_service.v1.walletService/GetWalletByID"
+	WalletService_CreateWallet_FullMethodName        = "/internal.proto.wallet_service.v1.walletService/CreateWallet"
+	WalletService_UpdateWallet_FullMethodName        = "/internal.proto.wallet_service.v1.walletService/UpdateWallet"
+	WalletService_DeleteWallet_FullMethodName        = "/internal.proto.wallet_service.v1.walletService/DeleteWallet"
+	WalletService_GetCategories_FullMethodName       = "/internal.proto.wallet_service.v1.walletService/GetCategories"
+	WalletService_GetCategoryByID_FullMethodName     = "/internal.proto.wallet_service.v1.walletService/GetCategoryByID"
+	WalletService_CreateCategory_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/CreateCategory"
+	WalletService_UpdateCategory_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/UpdateCategory"
+	WalletService_DeleteCategory_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/DeleteCategory"
+	WalletService_TransferWallet_FullMethodName      = "/internal.proto.wallet_service.v1.walletService/TransferWallet"
+	WalletService_CreateTransaction_FullMethodName   = "/internal.proto.wallet_service.v1.walletService/CreateTransaction"
+	WalletService_GetTransactions_FullMethodName     = "/internal.proto.wallet_service.v1.walletService/GetTransactions"
+	WalletService_GetLastTransactions_FullMethodName = "/internal.proto.wallet_service.v1.walletService/GetLastTransactions"
+	WalletService_GetCashflowReport_FullMethodName   = "/internal.proto.wallet_service.v1.walletService/GetCashflowReport"
+	WalletService_GetSummaryCategory_FullMethodName  = "/internal.proto.wallet_service.v1.walletService/GetSummaryCategory"
 )
 
 // WalletServiceClient is the client API for WalletService service.
@@ -52,6 +55,9 @@ type WalletServiceClient interface {
 	TransferWallet(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*MutationTransferResponse, error)
 	CreateTransaction(ctx context.Context, in *CreateTransactionRequest, opts ...grpc.CallOption) (*MutationTransactionResponse, error)
 	GetTransactions(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error)
+	GetLastTransactions(ctx context.Context, in *GetLastTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error)
+	GetCashflowReport(ctx context.Context, in *GetCashflowReportRequest, opts ...grpc.CallOption) (*GetCashflowReportResponse, error)
+	GetSummaryCategory(ctx context.Context, in *GetSummaryCategoryRequest, opts ...grpc.CallOption) (*GetSummaryCategoryResponse, error)
 }
 
 type walletServiceClient struct {
@@ -192,6 +198,36 @@ func (c *walletServiceClient) GetTransactions(ctx context.Context, in *GetTransa
 	return out, nil
 }
 
+func (c *walletServiceClient) GetLastTransactions(ctx context.Context, in *GetLastTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTransactionResponse)
+	err := c.cc.Invoke(ctx, WalletService_GetLastTransactions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletServiceClient) GetCashflowReport(ctx context.Context, in *GetCashflowReportRequest, opts ...grpc.CallOption) (*GetCashflowReportResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCashflowReportResponse)
+	err := c.cc.Invoke(ctx, WalletService_GetCashflowReport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletServiceClient) GetSummaryCategory(ctx context.Context, in *GetSummaryCategoryRequest, opts ...grpc.CallOption) (*GetSummaryCategoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSummaryCategoryResponse)
+	err := c.cc.Invoke(ctx, WalletService_GetSummaryCategory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WalletServiceServer is the server API for WalletService service.
 // All implementations must embed UnimplementedWalletServiceServer
 // for forward compatibility.
@@ -209,6 +245,9 @@ type WalletServiceServer interface {
 	TransferWallet(context.Context, *TransferRequest) (*MutationTransferResponse, error)
 	CreateTransaction(context.Context, *CreateTransactionRequest) (*MutationTransactionResponse, error)
 	GetTransactions(context.Context, *GetTransactionRequest) (*GetTransactionResponse, error)
+	GetLastTransactions(context.Context, *GetLastTransactionRequest) (*GetTransactionResponse, error)
+	GetCashflowReport(context.Context, *GetCashflowReportRequest) (*GetCashflowReportResponse, error)
+	GetSummaryCategory(context.Context, *GetSummaryCategoryRequest) (*GetSummaryCategoryResponse, error)
 	mustEmbedUnimplementedWalletServiceServer()
 }
 
@@ -257,6 +296,15 @@ func (UnimplementedWalletServiceServer) CreateTransaction(context.Context, *Crea
 }
 func (UnimplementedWalletServiceServer) GetTransactions(context.Context, *GetTransactionRequest) (*GetTransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTransactions not implemented")
+}
+func (UnimplementedWalletServiceServer) GetLastTransactions(context.Context, *GetLastTransactionRequest) (*GetTransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLastTransactions not implemented")
+}
+func (UnimplementedWalletServiceServer) GetCashflowReport(context.Context, *GetCashflowReportRequest) (*GetCashflowReportResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCashflowReport not implemented")
+}
+func (UnimplementedWalletServiceServer) GetSummaryCategory(context.Context, *GetSummaryCategoryRequest) (*GetSummaryCategoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSummaryCategory not implemented")
 }
 func (UnimplementedWalletServiceServer) mustEmbedUnimplementedWalletServiceServer() {}
 func (UnimplementedWalletServiceServer) testEmbeddedByValue()                       {}
@@ -513,6 +561,60 @@ func _WalletService_GetTransactions_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WalletService_GetLastTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLastTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).GetLastTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_GetLastTransactions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).GetLastTransactions(ctx, req.(*GetLastTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WalletService_GetCashflowReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCashflowReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).GetCashflowReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_GetCashflowReport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).GetCashflowReport(ctx, req.(*GetCashflowReportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WalletService_GetSummaryCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSummaryCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).GetSummaryCategory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_GetSummaryCategory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).GetSummaryCategory(ctx, req.(*GetSummaryCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WalletService_ServiceDesc is the grpc.ServiceDesc for WalletService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -571,6 +673,18 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTransactions",
 			Handler:    _WalletService_GetTransactions_Handler,
+		},
+		{
+			MethodName: "GetLastTransactions",
+			Handler:    _WalletService_GetLastTransactions_Handler,
+		},
+		{
+			MethodName: "GetCashflowReport",
+			Handler:    _WalletService_GetCashflowReport_Handler,
+		},
+		{
+			MethodName: "GetSummaryCategory",
+			Handler:    _WalletService_GetSummaryCategory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
