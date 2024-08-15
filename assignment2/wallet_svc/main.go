@@ -7,7 +7,6 @@ import (
 	"wallet_svc/entity"
 	grpcHandler "wallet_svc/handler/grpc"
 	pb2 "wallet_svc/proto/transaction_service/v1"
-	pb "wallet_svc/proto/wallet_service/v1"
 	"wallet_svc/repository/postgres_gorm"
 	"wallet_svc/service"
 
@@ -44,7 +43,7 @@ func main() {
 
 	// Run the grpc server
 	grpcServer := grpc.NewServer()
-	pb.RegisterWalletServiceServer(grpcServer, walletHandler)
+	v1.RegisterWalletServiceServer(grpcServer, walletHandler)
 	pb2.RegisterTransactionServiceServer(grpcServer, transactionHandler)
 	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {

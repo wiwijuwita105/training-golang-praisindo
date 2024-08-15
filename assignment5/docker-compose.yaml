@@ -29,6 +29,7 @@ services:
     ports:
       - "8080:8080"    # Port untuk web server HTTP
       - "50051:50051"  # Tambahkan baris ini untuk port gRPC
+      - "50052:50052"
     depends_on:
       - postgres
       - redis

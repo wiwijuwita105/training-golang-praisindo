@@ -1,32 +1,37 @@
-# Stage 1: Build the application
-FROM golang:1.22.5-alpine AS builder
+# Stage 1: Build stage
+FROM golang:1.22.5-alpine AS build
 
-# Set the working directory outside $GOPATH to enable the support for modules.
+# Set the working directory
 WORKDIR /app
 
-# Copy go mod and sum files to leverage Docker cache
-COPY go.mod go.sum ./
+# Copy the go.mod and go.sum files
+COPY go.sum ./
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed.
+# Copy the go.mod and go.sum files
+COPY go.mod  ./
+
+# Download all dependencies
 RUN go mod download
 
-# Copy the source code into the container.
-COPY . .
+# Copy the source code
+COPY cashflow-svc/ ./
 
-# Build the application.
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o /main ./cashflow-svc/cmd/web/main.go
+RUN go mod tidy
 
-# Stage 2: Set up the runtime container
-FROM alpine:latest
+# Build the Go application
+RUN CGO_ENABLED=0 GOOS=linux go build -o go-cashflow-svc .
 
-# Install necessary dependencies (if any) for the binary to run.
-RUN apk --no-cache add ca-certificates
+# Stage 2: Final stage
+FROM alpine:edge
 
-# Copy the binary to the production image from the builder stage.
-COPY --from=builder /main /main
+# Set the working directory
+WORKDIR /app
 
-# Set the binary as the entrypoint of the container.
-ENTRYPOINT ["/main"]
+# Copy the binary from the build stage
+COPY --from=build /app/go-cashflow-svc .
 
-# Expose the port the app runs on
-EXPOSE 8080
+# menambahkan ca-certificates
+RUN apk add --no-cache ca-certificates
+
+# Set the entrypoint command
+CMD ["./go-cashflow-svc"]
