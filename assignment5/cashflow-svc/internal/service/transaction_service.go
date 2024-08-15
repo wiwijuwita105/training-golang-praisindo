@@ -7,7 +7,6 @@ import (
 	"assignment5/cashflow-svc/internal/repository/postgres_gorm"
 	"context"
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"log"
 	"time"
@@ -65,7 +64,7 @@ func (s *transactionService) TransferWallet(ctx context.Context, request model.T
 
 		if senderWallet.Balance < request.Nominal {
 			tx.Rollback()
-			return model.TransferWalletResponse{}, errors.New("Insufficient balance to carry out transactions. Your current balance: " + fmt.Sprint("%f", senderWallet.Balance))
+			return model.TransferWalletResponse{}, errors.New("Insufficient balance to carry out transactions")
 		}
 
 		//create transaction out
@@ -86,8 +85,7 @@ func (s *transactionService) TransferWallet(ctx context.Context, request model.T
 		}
 
 		//update balance wallet sender
-		var lastBalanceSender float64
-		lastBalanceSender = senderWallet.Balance - request.Nominal
+		var lastBalanceSender = senderWallet.Balance - request.Nominal
 		updateWalletSender := entity.Wallet{
 			ID:      senderWallet.ID,
 			Balance: lastBalanceSender,
@@ -115,8 +113,7 @@ func (s *transactionService) TransferWallet(ctx context.Context, request model.T
 		}
 
 		//update balance wallet receiver
-		var lastBalanceReceiver float64
-		lastBalanceReceiver = recipientWallet.Balance + request.Nominal
+		var lastBalanceReceiver = recipientWallet.Balance + request.Nominal
 		updateWalletReceiver := entity.Wallet{
 			ID:      recipientWallet.ID,
 			Balance: lastBalanceReceiver,
