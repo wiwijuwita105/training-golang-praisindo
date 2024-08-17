@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+        .header-info {
+            font-weight: bold;
+        }
+        .report-header {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="report-header">
+    <div>
+        <h1><center><strong>Weather Report</strong></center></h1>
+    </div>
+</div>
+<div>
+    <div>Latitude: {{ .Latitude }}</div>
+    <div>Longitude: {{ .Longitude }}</div>
+    <div>Current Time: {{ .CurrentTime }}</div>
+    <div>Time Zone: {{ .TimeZone }}</div>
+</div>
+<table>
+    <thead>
+    <tr>
+        <th>No</th>
+        <th>Time</th>
+        <th>Temperature 2m</th>
+        <th>Relative Humidity 2m</th>
+        <th>Wind Speed 10m</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Example row -->
+    {{range .Data}}
+    <tr>
+        <td>{{ .No }}</td>
+        <td>{{ .Time }}</td>
+        <td>{{ .Temperature2m }}</td>
+        <td>{{ .RelativeHumidity2m }}</td>
+        <td>{{ .WindSpeed10m }}</td>
+    </tr>
+    {{end}}
+    <!-- Additional rows can be added here -->
+    </tbody>
+</table>
+</body>
+</html>
