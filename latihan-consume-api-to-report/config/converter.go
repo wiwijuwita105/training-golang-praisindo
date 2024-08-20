@@ -33,7 +33,7 @@ func ConvertResponseAPIWeatherToReportPDF(forecastResponse entity.ForecastCurren
 	dataReport.Latitude = forecastResponse.Latitude
 	dataReport.Longitude = forecastResponse.Longitude
 	dataReport.CurrentTime = forecastResponse.Current.Time
-	dataReport.TimeZone = forecastResponse.Timezone
+	dataReport.Timezone = forecastResponse.Timezone
 
 	for i, row := range forecastResponse.Hourly.Time {
 		Humidity := forecastResponse.Hourly.RelativeHumidity2m[i]
