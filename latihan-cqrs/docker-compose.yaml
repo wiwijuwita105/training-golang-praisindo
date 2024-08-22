@@ -1,0 +1,26 @@
+version: "1"
+services:
+  kafka:
+    image: apache/kafka:3.8.0
+    ports:
+      - 9092:9092
+  postgres-db-write:
+    image: postgres
+    container_name: db_write
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db_cqrs_write
+    ports:
+      - 5434:5434
+    command: -p 5434
+  postgres-db-read:
+    image: postgres
+    container_name: db_read
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db_cqrs_read
+    ports:
+      - 5433:5433
+    command: -p 5433
