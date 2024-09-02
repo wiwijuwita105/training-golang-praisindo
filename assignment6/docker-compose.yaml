@@ -1,0 +1,40 @@
+version: "1"
+services:
+  kafka:
+    image: apache/kafka:3.8.0
+    ports:
+      - 9092:9092
+    volumes:
+      - ./kafka-data:/var/lib/kafka/data
+  postgres-db-assignment6-user:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db_users
+    ports:
+      - 5435:5435
+    command: -p 5435
+    volumes:
+      - ./postgres-db-assignment6-user:/var/lib/postgresql/data
+  postgres-db-assignment6-wallet:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db_wallets
+    ports:
+      - 5436:5436
+    command: -p 5436
+    volumes:
+      - ./postgres-db-assignment6-wallet:/var/lib/postgresql/data
+  gateway-main:
+    build:
+      dockerfile: dockerfile-main
+      context: .
+    depends_on:
+      - postgres-db-assignment6-wallet
+      - postgres-db-assignment6-user
+      - kafka
+    ports:
+      - 8080:8080

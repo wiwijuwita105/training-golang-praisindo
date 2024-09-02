@@ -14,7 +14,7 @@ type exampleConsumerGroupHandler struct{}
 
 func (exampleConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (exampleConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (h exampleConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (h exampleConsumerGroupHandler) sloConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.Printf("Received message: %s\n", string(msg.Value))
 		// Process the message as per your requirement here
